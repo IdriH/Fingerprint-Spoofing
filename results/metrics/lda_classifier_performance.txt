@@ -1,0 +1,35 @@
+LDA without PCA:
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 186 (out of 2000 samples)
+Error rate: 9.3%
+LDA with PCA (m=1):
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 187 (out of 2000 samples)
+Error rate: 9.3%
+LDA with PCA (m=2):
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 185 (out of 2000 samples)
+Error rate: 9.2%
+LDA with PCA (m=3):
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 185 (out of 2000 samples)
+Error rate: 9.2%
+LDA with PCA (m=4):
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 185 (out of 2000 samples)
+Error rate: 9.2%
+LDA with PCA (m=5):
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 186 (out of 2000 samples)
+Error rate: 9.3%
+LDA with PCA (m=6):
+Labels:      [0 0 1 ... 0 0 0]
+Predictions: [0 0 1 ... 0 0 0]
+Number of errors: 186 (out of 2000 samples)
+Error rate: 9.3%
