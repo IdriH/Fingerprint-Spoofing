@@ -1,9 +1,9 @@
 import numpy 
 
-def vcol(x): # Same as in pca script
+def vcol(x):
     return x.reshape((x.size, 1))
 
-def vrow(x): # Same as in pca script
+def vrow(x):
     return x.reshape((1, x.size))
 
 

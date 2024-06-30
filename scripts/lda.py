@@ -7,18 +7,18 @@ import matplotlib.pyplot as plt
 import scipy.linalg
 from load import load
 
-def load_iris(): # Same as in pca script
+def load_iris():
     
     import sklearn.datasets
     return sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target']
 
-def vcol(x): # Same as in pca script
+def vcol(x): 
     return x.reshape((x.size, 1))
 
-def vrow(x): # Same as in pca script
+def vrow(x): 
     return x.reshape((1, x.size))
 
-def compute_mu_C(D): # Same as in pca script
+def compute_mu_C(D):
     mu = vcol(D.mean(1))
     C = ((D-mu) @ (D-mu).T) / float(D.shape[1])
     return mu, C
