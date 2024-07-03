@@ -143,157 +143,157 @@ if __name__ == '__main__':
 
     ##downsampled trainingset 
 
-# Downsample the training data
-DTR_downsampled = DTR[:, ::50]
-LTR_downsampled = LTR[::50]
+    # Downsample the training data
+    DTR_downsampled = DTR[:, ::50]
+    LTR_downsampled = LTR[::50]
 
-# Define the range of lambda values to test
-lambda_values = np.logspace(-4, 2, 13)
+    # Define the range of lambda values to test
+    lambda_values = np.logspace(-4, 2, 13)
 
-# Initialize lists to store DCF values
-actual_DCFs = []
-minimum_DCFs = []
+    # Initialize lists to store DCF values
+    actual_DCFs = []
+    minimum_DCFs = []
 
-# Compute empirical prior for the downsampled training set
-pEmp = (LTR_downsampled == 1).sum() / LTR_downsampled.size
+    # Compute empirical prior for the downsampled training set
+    pEmp = (LTR_downsampled == 1).sum() / LTR_downsampled.size
 
-# Loop over lambda values
-for lamb in lambda_values:
-    # Train the logistic regression model on downsampled training data
-    w, b = trainLogRegBinary(DTR_downsampled, LTR_downsampled, lamb)
+    # Loop over lambda values
+    for lamb in lambda_values:
+        # Train the logistic regression model on downsampled training data
+        w, b = trainLogRegBinary(DTR_downsampled, LTR_downsampled, lamb)
+        
+        # Compute validation scores
+        sVal = np.dot(w.T, DVAL) + b
+        
+        # Compute LLR-like scores
+        sValLLR = sVal - np.log(pEmp / (1 - pEmp))
+        
+        # Compute actual and minimum DCF for πT = 0.1
+        actual_DCF = compute_actDCF_binary_fast(sValLLR, LVAL, 0.1, 1.0, 1.0)
+        minimum_DCF = compute_minDCF_binary_fast(sValLLR, LVAL, 0.1, 1.0, 1.0)
     
-    # Compute validation scores
-    sVal = np.dot(w.T, DVAL) + b
-    
-    # Compute LLR-like scores
-    sValLLR = sVal - np.log(pEmp / (1 - pEmp))
-    
-    # Compute actual and minimum DCF for πT = 0.1
-    actual_DCF = compute_actDCF_binary_fast(sValLLR, LVAL, 0.1, 1.0, 1.0)
-    minimum_DCF = compute_minDCF_binary_fast(sValLLR, LVAL, 0.1, 1.0, 1.0)
-   
-    # Store the DCF values
-    actual_DCFs.append(actual_DCF)
-    minimum_DCFs.append(minimum_DCF)
+        # Store the DCF values
+        actual_DCFs.append(actual_DCF)
+        minimum_DCFs.append(minimum_DCF)
 
-# Plot the results
-plt.figure(figsize=(8, 6))
-plt.plot(lambda_values, actual_DCFs, label='Actual DCF', color='r')
-plt.plot(lambda_values, minimum_DCFs, label='Minimum DCF', color='b')
-plt.xscale('log', base=10)
-plt.ylim([0, 1.1])
-plt.xlabel("Lambda")
-plt.ylabel("DCF value")
-plt.title("DCF vs Lambda for Logistic Regression with Downsampled Training Data")
-plt.legend()
-plt.grid(True)
-plt.savefig('../results/plots/logistic_regression/unweighted_model_train_downsampled.png')
-plt.show()
+    # Plot the results
+    plt.figure(figsize=(8, 6))
+    plt.plot(lambda_values, actual_DCFs, label='Actual DCF', color='r')
+    plt.plot(lambda_values, minimum_DCFs, label='Minimum DCF', color='b')
+    plt.xscale('log', base=10)
+    plt.ylim([0, 1.1])
+    plt.xlabel("Lambda")
+    plt.ylabel("DCF value")
+    plt.title("DCF vs Lambda for Logistic Regression with Downsampled Training Data")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('../results/plots/logistic_regression/unweighted_model_train_downsampled.png')
+    plt.show()
 
 
-##weighted logistic regression
+    ##weighted logistic regression
 
-lambdas = np.logspace(-4, 2, 13)
-pT = 0.1  # Target prior
+    lambdas = np.logspace(-4, 2, 13)
+    pT = 0.1  # Target prior
 
-actDCF_values = []
-minDCF_values = []
+    actDCF_values = []
+    minDCF_values = []
 
-for lamb in lambdas:
-    w, b = trainWeightedLogRegBinary(DTR, LTR, lamb, pT)
-    sVal = np.dot(w.T, DVAL) + b
-    sValLLR = sVal - np.log(pT / (1 - pT))
+    for lamb in lambdas:
+        w, b = trainWeightedLogRegBinary(DTR, LTR, lamb, pT)
+        sVal = np.dot(w.T, DVAL) + b
+        sValLLR = sVal - np.log(pT / (1 - pT))
 
-    actDCF = compute_actDCF_binary_fast(sValLLR, LVAL, pT, 1.0, 1.0)
-    minDCF = compute_minDCF_binary_fast(sValLLR, LVAL, pT, 1.0, 1.0)
+        actDCF = compute_actDCF_binary_fast(sValLLR, LVAL, pT, 1.0, 1.0)
+        minDCF = compute_minDCF_binary_fast(sValLLR, LVAL, pT, 1.0, 1.0)
 
-    actDCF_values.append(actDCF)
-    minDCF_values.append(minDCF)
+        actDCF_values.append(actDCF)
+        minDCF_values.append(minDCF)
 
-    
+        
 
-plt.figure()
-plt.plot(lambdas, actDCF_values, label='Actual DCF', color='r')
-plt.plot(lambdas, minDCF_values, label='Minimum DCF', color='b')
-plt.xscale('log')
-plt.xlabel('Lambda')
-plt.ylabel('DCF value')
-plt.title('DCF vs Lambda for Prior-Weighted Logistic Regression')
-plt.legend()
-plt.grid(True)
-plt.savefig('../results/plots/logistic_regression/weighted_model_train.png')
-plt.show()
-
-
-DTR_exp = expand_features_quadratic(DTR)
-DVAL_exp = expand_features_quadratic(DVAL)
-
-# 2. Train and evaluate the model for different values of lambda
-lambdas = np.logspace(-4, 2, 13)
-actual_DCFs = []
-minimum_DCFs = []
-
-for lamb in lambdas:
-    w, b = trainLogRegBinary(DTR_exp, LTR, lamb)  # Train model
-    sVal = np.dot(w.T, DVAL_exp) + b  # Compute validation scores
-    pEmp = (LTR == 1).sum() / LTR.size  # Compute empirical prior
-    sValLLR = sVal - np.log(pEmp / (1 - pEmp))  # Compute LLR-like scores
-    
-    # Compute actual DCF
-    act_DCF = compute_actDCF_binary_fast(sValLLR, LVAL, pT, Cfn=1.0, Cfp=1.0)
-    # Compute minimum DCF
-    min_DCF = compute_minDCF_binary_fast(sValLLR, LVAL, pT, Cfn=1.0, Cfp=1.0)
-    
-    actual_DCFs.append(act_DCF)
-    minimum_DCFs.append(min_DCF)
-    
+    plt.figure()
+    plt.plot(lambdas, actDCF_values, label='Actual DCF', color='r')
+    plt.plot(lambdas, minDCF_values, label='Minimum DCF', color='b')
+    plt.xscale('log')
+    plt.xlabel('Lambda')
+    plt.ylabel('DCF value')
+    plt.title('DCF vs Lambda for Prior-Weighted Logistic Regression')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('../results/plots/logistic_regression/weighted_model_train.png')
+    plt.show()
 
 
-# 3. Plot the results
-plt.figure()
-plt.plot(lambdas, actual_DCFs, label='Actual DCF', color='r')
-plt.plot(lambdas, minimum_DCFs, label='Minimum DCF', color='b')
-plt.xscale('log', base=10)
-plt.xlabel('Lambda')
-plt.ylabel('DCF value')
-plt.title('DCF vs Lambda for Quadratic Logistic Regression')
-plt.legend()
-plt.grid(True)
-plt.ylim([0, 1.1])
-plt.savefig('../results/plots/logistic_regression/unweighterd_qudratic.png')
-plt.show()
+    DTR_exp = expand_features_quadratic(DTR)
+    DVAL_exp = expand_features_quadratic(DVAL)
 
-DTR_centered, DVAL_centered = center_data(DTR, DVAL)
+    # 2. Train and evaluate the model for different values of lambda
+    lambdas = np.logspace(-4, 2, 13)
+    actual_DCFs = []
+    minimum_DCFs = []
 
-# Train and evaluate the model for different values of lambda using centered data
-lambdas = np.logspace(-4, 2, 13)
-actual_DCFs_centered = []
-minimum_DCFs_centered = []
+    for lamb in lambdas:
+        w, b = trainLogRegBinary(DTR_exp, LTR, lamb)  # Train model
+        sVal = np.dot(w.T, DVAL_exp) + b  # Compute validation scores
+        pEmp = (LTR == 1).sum() / LTR.size  # Compute empirical prior
+        sValLLR = sVal - np.log(pEmp / (1 - pEmp))  # Compute LLR-like scores
+        
+        # Compute actual DCF
+        act_DCF = compute_actDCF_binary_fast(sValLLR, LVAL, pT, Cfn=1.0, Cfp=1.0)
+        # Compute minimum DCF
+        min_DCF = compute_minDCF_binary_fast(sValLLR, LVAL, pT, Cfn=1.0, Cfp=1.0)
+        
+        actual_DCFs.append(act_DCF)
+        minimum_DCFs.append(min_DCF)
+        
 
-for lamb in lambdas:
-    w, b = trainLogRegBinary(DTR_centered, LTR, lamb)  # Train model
-    sVal = np.dot(w.T, DVAL_centered) + b  # Compute validation scores
-    pEmp = (LTR == 1).sum() / LTR.size  # Compute empirical prior
-    sValLLR = sVal - np.log(pEmp / (1 - pEmp))  # Compute LLR-like scores
-    
-    # Compute actual DCF
-    act_DCF = compute_actDCF_binary_fast(sValLLR, LVAL, 0.1, Cfn=1.0, Cfp=1.0)
-    # Compute minimum DCF
-    min_DCF = compute_minDCF_binary_fast(sValLLR, LVAL, 0.1, Cfn=1.0, Cfp=1.0)
-    
-    actual_DCFs_centered.append(act_DCF)
-    minimum_DCFs_centered.append(min_DCF)
 
-# Plot the results
-plt.figure()
-plt.plot(lambdas, actual_DCFs_centered, label='Actual DCF (Centered)', color='r')
-plt.plot(lambdas, minimum_DCFs_centered, label='Minimum DCF (Centered)', color='b')
-plt.xscale('log', base=10)
-plt.xlabel('Lambda')
-plt.ylabel('DCF value')
-plt.title('DCF vs Lambda for Centered Logistic Regression')
-plt.legend()
-plt.grid(True)
-plt.ylim([0, 1.1])
-plt.savefig('../results/plots/logistic_regression/centered_dataset_logisticRegression.png')
-plt.show()
+    # 3. Plot the results
+    plt.figure()
+    plt.plot(lambdas, actual_DCFs, label='Actual DCF', color='r')
+    plt.plot(lambdas, minimum_DCFs, label='Minimum DCF', color='b')
+    plt.xscale('log', base=10)
+    plt.xlabel('Lambda')
+    plt.ylabel('DCF value')
+    plt.title('DCF vs Lambda for Quadratic Logistic Regression')
+    plt.legend()
+    plt.grid(True)
+    plt.ylim([0, 1.1])
+    plt.savefig('../results/plots/logistic_regression/unweighterd_qudratic.png')
+    plt.show()
+
+    DTR_centered, DVAL_centered = center_data(DTR, DVAL)
+
+    # Train and evaluate the model for different values of lambda using centered data
+    lambdas = np.logspace(-4, 2, 13)
+    actual_DCFs_centered = []
+    minimum_DCFs_centered = []
+
+    for lamb in lambdas:
+        w, b = trainLogRegBinary(DTR_centered, LTR, lamb)  # Train model
+        sVal = np.dot(w.T, DVAL_centered) + b  # Compute validation scores
+        pEmp = (LTR == 1).sum() / LTR.size  # Compute empirical prior
+        sValLLR = sVal - np.log(pEmp / (1 - pEmp))  # Compute LLR-like scores
+        
+        # Compute actual DCF
+        act_DCF = compute_actDCF_binary_fast(sValLLR, LVAL, 0.1, Cfn=1.0, Cfp=1.0)
+        # Compute minimum DCF
+        min_DCF = compute_minDCF_binary_fast(sValLLR, LVAL, 0.1, Cfn=1.0, Cfp=1.0)
+        
+        actual_DCFs_centered.append(act_DCF)
+        minimum_DCFs_centered.append(min_DCF)
+
+    # Plot the results
+    plt.figure()
+    plt.plot(lambdas, actual_DCFs_centered, label='Actual DCF (Centered)', color='r')
+    plt.plot(lambdas, minimum_DCFs_centered, label='Minimum DCF (Centered)', color='b')
+    plt.xscale('log', base=10)
+    plt.xlabel('Lambda')
+    plt.ylabel('DCF value')
+    plt.title('DCF vs Lambda for Centered Logistic Regression')
+    plt.legend()
+    plt.grid(True)
+    plt.ylim([0, 1.1])
+    plt.savefig('../results/plots/logistic_regression/centered_dataset_logisticRegression.png')
+    plt.show()

@@ -18,6 +18,7 @@ def compute_posteriors(log_clas_conditional_ll, prior_array):
     logPost = logJoint - scipy.special.logsumexp(logJoint, 0)
     return np.exp(logPost)
 
+
 def compute_confusion_matrix(predictedLabels, classLabels):
     nClasses = classLabels.max() + 1
     M = np.zeros((nClasses, nClasses), dtype=np.int32)
